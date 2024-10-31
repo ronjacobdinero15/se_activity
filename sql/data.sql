@@ -13,6 +13,13 @@ CREATE TABLE items (
     FOREIGN KEY (shelf_id) REFERENCES shelves(shelf_id) ON DELETE CASCADE
 );
 
+CREATE TABLE user_passwords (
+	user_id INT AUTO_INCREMENT PRIMARY KEY,
+	username VARCHAR(50),
+	password VARCHAR(50),
+	date_added TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Inserting items for Chips Shelf (shelf_id = 1)
 INSERT INTO items (item_name, price, shelf_id) VALUES
 ('Lays Potato Chips', 1.50, 1),

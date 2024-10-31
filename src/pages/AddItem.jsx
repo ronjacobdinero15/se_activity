@@ -14,7 +14,7 @@ function AddItem() {
   const { shelf_id } = useParams()
 
   const { mutate } = useMutation({
-    mutationFn: () => createItem({ item_name: itemName, price }, shelf_id),
+    mutationFn: () => createItem({ item_name: itemName, price, shelf_id }),
     onSuccess: () => navigate(`/shelf/${shelf_id}`),
   })
 

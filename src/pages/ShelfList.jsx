@@ -2,7 +2,6 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-// import { deleteShelf } from '../services/apiShelves'
 import { deleteItem, getShelfData } from '../services/apiShelves'
 
 function ShelfList() {
@@ -69,9 +68,7 @@ function ShelfList() {
                 <td>₱{shelf.price}</td>
                 <td>{shelf.shelf_id}</td>
                 <td>{shelf.date_added}</td>
-                <td
-                  style={{ display: 'flex', justifyContent: 'space-between' }}
-                >
+                <td className="flex justify-content-between">
                   <div>
                     <Link
                       to={`/edit/item/${shelf.item_id}`}

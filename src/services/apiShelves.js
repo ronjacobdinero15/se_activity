@@ -1,4 +1,4 @@
-const apiUrl = 'http://localhost/react-php-mysql/phpreactcrud/api/action.php'
+import { apiUrl } from '../utils/links'
 
 export async function getShelves() {
   try {
@@ -78,13 +78,13 @@ export async function createShelf(shelf_name) {
   return res.json()
 }
 
-export async function createItem(item_obj, shelf_id) {
-  const res = await fetch(`${apiUrl}?shelf_id=${shelf_id}`, {
+export async function createItem(item_obj) {
+  const res = await fetch(apiUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ ...item_obj, shelf_id }),
+    body: JSON.stringify(item_obj),
   })
 
   if (!res.ok) throw new Error('Error creating a new shelf')
