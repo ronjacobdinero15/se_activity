@@ -5,12 +5,14 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 
 import { getItemData, updateItem } from '../services/apiShelves'
+import toast from 'react-hot-toast'
 
 function EditItem() {
   let navigate = useNavigate()
   const { item_id } = useParams()
   const [itemName, setItemName] = useState('')
   const [price, setPrice] = useState(0)
+  const user = JSON.parse(sessionStorage.getItem('user'))
 
   const { data: item, status } = useQuery({
     queryKey: ['item', item_id],
@@ -25,8 +27,20 @@ function EditItem() {
   }, [status, item])
 
   const { mutate } = useMutation({
-    mutationFn: () => updateItem(itemName, price, item_id),
-    onSuccess: () => navigate(-1),
+    mutationFn: () =>
+      updateItem({
+        item_id,
+        item_name: itemName,
+        price,
+        updatedBy: user.username,
+      }),
+    onSuccess: () => {
+      toast.success('Item successfully edited')
+      navigate(-1)
+    },
+    onError: err => {
+      toast.error(err.message)
+    },
   })
 
   const handleSubmit = e => {

@@ -2,6 +2,8 @@ CREATE TABLE shelves (
     shelf_id INT AUTO_INCREMENT PRIMARY KEY,
     shelf_name VARCHAR(50) NOT NULL,
     date_added TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    added_by VARCHAR(55),
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE items (
@@ -10,6 +12,8 @@ CREATE TABLE items (
     price DECIMAL(10, 2) NOT NULL,
     shelf_id INT,
     date_added TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    added_by VARCHAR(55),
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     FOREIGN KEY (shelf_id) REFERENCES shelves(shelf_id) ON DELETE CASCADE
 );
 
@@ -17,7 +21,12 @@ CREATE TABLE user_passwords (
 	user_id INT AUTO_INCREMENT PRIMARY KEY,
 	username VARCHAR(50),
 	password VARCHAR(50),
-	date_added TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    email VARCHAR(50),
+    first_name VARCHAR(50), 
+    last_name VARCHAR(50), 
+    address VARCHAR(255), 
+    age INT,
+    date_added TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Inserting items for Chips Shelf (shelf_id = 1)

@@ -4,20 +4,33 @@ import { Link, useNavigate } from 'react-router-dom'
 
 import { useMutation } from '@tanstack/react-query'
 
-import { createShelf } from '../services/apiShelves'
+import { insertShelf as insertShelfApi } from '../services/apiShelves'
+import toast from 'react-hot-toast'
 
 function AddShelf() {
   const navigate = useNavigate()
   const [shelfName, setShelfName] = useState('')
+  const user = JSON.parse(sessionStorage.getItem('user'))
 
-  const { mutate } = useMutation({
-    mutationFn: () => createShelf({ shelf_name: shelfName }),
-    onSuccess: () => navigate('/'),
+  const { mutate: insertShelf } = useMutation({
+    mutationFn: () => insertShelfApi(shelfName, user.username),
+    onSuccess: data => {
+      if (data.success) {
+        toast.success('Shelf successfully added')
+        navigate('/')
+      }
+    },
+    onError: err => {
+      toast.error(err.message)
+    },
   })
 
   const handleSubmit = e => {
     e.preventDefault()
-    mutate()
+
+    if (!shelfName) return
+
+    insertShelf()
   }
 
   return (
@@ -36,7 +49,7 @@ function AddShelf() {
         <div className="row">
           <div className="col-md-4">&nbsp;</div>
           <div className="col-md-4">
-            <form method="POST" onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit}>
               <div className="mb-3">
                 <label htmlFor="shelf_name">Shelf Name</label>
                 <input

@@ -7,15 +7,15 @@ import {
   deleteShelve as deleteShelveApi,
   getShelves,
 } from '../services/apiShelves'
-import UserList from '../ui/UserList'
-import Users from '../ui/Users'
+import toast from 'react-hot-toast'
+import Spinner from '../ui/Spinner'
 
 function ShelvesList() {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
-  const currentUser = sessionStorage.getItem('username')
+  const user = JSON.parse(sessionStorage.getItem('user')) || ''
 
-  const { data: shelves = [] } = useQuery({
+  const { data: shelves = [], isLoading } = useQuery({
     queryKey: ['shelves'],
     queryFn: getShelves,
   })
@@ -23,6 +23,7 @@ function ShelvesList() {
   const { mutate: deleteShelve } = useMutation({
     mutationFn: id => deleteShelveApi(id),
     onSuccess: () => {
+      toast.success('Shelf deleted successfully')
       queryClient.invalidateQueries({ active: true })
     },
   })
@@ -30,20 +31,24 @@ function ShelvesList() {
   const { mutate: logout } = useMutation({
     mutationFn: logoutApi,
     onSuccess: () => {
-      sessionStorage.removeItem('username')
+      toast.success(`${user.username} is successfully logged out`)
+      sessionStorage.removeItem('user')
       queryClient.clear()
       navigate('/login')
     },
   })
 
-  if (status === 'loading') return <div>Loading...</div>
+  if (isLoading) return <Spinner />
 
   return (
     <div>
       <div className="d-flex justify-content-between mb-2">
-        <h1 className="lead">
-          Ohayo gozaimasu, <span className="text-danger">{currentUser}</span>
-        </h1>
+        <div>
+          <span className="lead">Ohayo gozaimasu, </span>
+          <span className="text-danger font-weight-bold text-uppercase">
+            {user.username}
+          </span>
+        </div>
         <button className="btn btn-primary" onClick={logout}>
           Logout
         </button>
@@ -69,6 +74,9 @@ function ShelvesList() {
                 <th>Shelf ID</th>
                 <th>Shelf Name</th>
                 <th>Date Added</th>
+                <th>Added By</th>
+                <th>Last Updated</th>
+                <th>Updated By</th>
                 <th>Action</th>
               </tr>
             </thead>
@@ -78,6 +86,11 @@ function ShelvesList() {
                   <td>{shelf.shelf_id}</td>
                   <td>{shelf.shelf_name}</td>
                   <td>{shelf.date_added}</td>
+                  <td>
+                    <Link to={`/user/${user.user_id}`}>{shelf.added_by}</Link>
+                  </td>
+                  <td>{shelf.last_updated}</td>
+                  <td>{shelf.updated_by}</td>
                   <td
                     style={{ display: 'flex', justifyContent: 'space-between' }}
                   >
@@ -110,8 +123,6 @@ function ShelvesList() {
           </table>
         </div>
       </div>
-
-      <Users />
     </div>
   )
 }

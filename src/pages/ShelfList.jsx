@@ -3,12 +3,20 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { deleteItem, getShelfData } from '../services/apiShelves'
+import toast from 'react-hot-toast'
+import Spinner from '../ui/Spinner'
 
 function ShelfList() {
   const { shelf_id } = useParams()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const { data: items = [], status } = useQuery({
+  const current_user = JSON.parse(sessionStorage.getItem('user'))
+
+  const {
+    data: items = [],
+    status,
+    isLoading,
+  } = useQuery({
     queryKey: ['shelfItems', shelf_id],
     queryFn: () => getShelfData(shelf_id, 'shelf_data'),
   })
@@ -16,6 +24,7 @@ function ShelfList() {
   const { mutate } = useMutation({
     mutationFn: item_id => deleteItem(item_id),
     onSuccess: () => {
+      toast.success(`Item deleted successfully`)
       queryClient.invalidateQueries(['shelfItems', shelf_id])
     },
   })
@@ -24,7 +33,7 @@ function ShelfList() {
     queryClient.invalidateQueries({ active: true })
   }
 
-  if (status === 'loading') return <div>Loading...</div>
+  if (isLoading) return <Spinner />
 
   if (status === 'error') return <div>Error fetching items.</div>
 
@@ -57,6 +66,9 @@ function ShelfList() {
               <th>Price</th>
               <th>Shelf ID</th>
               <th>Date Added</th>
+              <th>Added By</th>
+              <th>Last Updated</th>
+              <th>Updated By</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -68,6 +80,13 @@ function ShelfList() {
                 <td>₱{shelf.price}</td>
                 <td>{shelf.shelf_id}</td>
                 <td>{shelf.date_added}</td>
+                <td>
+                  <Link to={`/user/${current_user.user_id}`}>
+                    {shelf.added_by}
+                  </Link>
+                </td>
+                <td>{shelf.last_updated}</td>
+                <td>{shelf.updated_by}</td>
                 <td className="flex justify-content-between">
                   <div>
                     <Link

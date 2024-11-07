@@ -5,11 +5,13 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 
 import { getShelfData, updateShelf } from '../services/apiShelves'
+import toast from 'react-hot-toast'
 
 function EditShelf() {
   let navigate = useNavigate()
   const { shelf_id } = useParams()
   const [shelfName, setShelfName] = useState('')
+  const user = JSON.parse(sessionStorage.getItem('user'))
 
   const { data: shelf, status } = useQuery({
     queryKey: ['shelf', shelf_id],
@@ -23,8 +25,19 @@ function EditShelf() {
   }, [status, shelf])
 
   const { mutate } = useMutation({
-    mutationFn: () => updateShelf({ shelfName, shelf_id }),
-    onSuccess: () => navigate('/'),
+    mutationFn: () =>
+      updateShelf({
+        shelf_id,
+        shelf_name: shelfName,
+        updatedBy: user.username,
+      }),
+    onSuccess: () => {
+      toast.success('Item successfully edited')
+      navigate('/')
+    },
+    onError: err => {
+      toast.error(err.message)
+    },
   })
 
   const handleSubmit = e => {
@@ -50,7 +63,7 @@ function EditShelf() {
         <div className="row">
           <div className="col-md-4">&nbsp;</div>
           <div className="col-md-4">
-            <form method="POST" onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit}>
               <div className="mb-3">
                 <label htmlFor="shelf_name">Shelf Name</label>
                 <input

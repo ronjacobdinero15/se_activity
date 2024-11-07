@@ -1,48 +1,46 @@
 import { useMutation } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
-import { login } from '../services/apiAuth'
+import { login as loginApi } from '../services/apiAuth'
+import { useState } from 'react'
+import toast from 'react-hot-toast'
 
 function Login() {
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
+  const { register, formState, handleSubmit } = useForm()
+  const { errors } = formState
   const [message, setMessage] = useState('')
 
   const navigate = useNavigate()
 
-  const { mutate } = useMutation({
-    mutationFn: ({ user, action }) => login({ user, action }),
+  const { mutate: login } = useMutation({
+    mutationFn: ({ user }) => loginApi(user),
     onSuccess: data => {
       if (data.success) {
+        toast.success(`${data.username} successfully logged in`)
         navigate('/dashboard')
-        sessionStorage.setItem('username', data.username)
-      } else {
-        setMessage(data.message)
-        setUsername('')
-        setPassword('')
+        sessionStorage.setItem(
+          'user',
+          JSON.stringify({ username: data.username, user_id: data.id })
+        )
+
+        return
       }
+      setMessage(data.message)
     },
+    onError: err => toast.error(err.message),
   })
 
-  function handleSubmit(e) {
-    e.preventDefault()
-
-    if (!username || !password) {
-      setUsername('')
-      setPassword('')
-      setMessage('Make sure input fields are correct')
-
-      return
-    }
-
-    mutate({ user: { username, password }, action: 'login' })
+  function onSubmit({ username, password }) {
+    login({ user: { username, password } })
   }
 
   return (
-    <div className="">
-      <h2>Login</h2>
-      {<p>{message}</p>}
-      <form method="POST" onSubmit={handleSubmit} className="w-25">
+    <div className="d-flex flex-column align-items-center">
+      <h3 className="h3">Login</h3>
+
+      {message && <p className="text-danger">{message}</p>}
+
+      <form onSubmit={handleSubmit(onSubmit)} className="w-25">
         <div>
           <label htmlFor="username">Username:</label>
           <input
@@ -50,12 +48,9 @@ function Login() {
             name="username"
             autoComplete="username"
             className="form-control"
-            value={username}
-            onChange={e => {
-              setUsername(e.target.value)
-              setMessage('')
-            }}
+            {...register('username', { required: 'This field is required' })}
           />
+          {errors && <p className="text-danger">{errors?.username?.message}</p>}
         </div>
 
         <div>
@@ -65,21 +60,19 @@ function Login() {
             autoComplete="current-password"
             className="form-control"
             name="password"
-            value={password}
-            onChange={e => {
-              setPassword(e.target.value)
-              setMessage('')
-            }}
+            {...register('password', { required: 'This field is required' })}
           />
+          {errors && <p className="text-danger">{errors?.password?.message}</p>}
         </div>
-        <input
-          type="submit"
-          name="loginUserBtn"
-          className="btn btn-primary mt-3"
-          value="Login"
-        />
-
-        <Link to="/register">Register</Link>
+        <div className="d-flex justify-content-between align-items-center">
+          <input
+            type="submit"
+            name="loginUserBtn"
+            className="btn btn-primary mt-3"
+            value="Login"
+          />
+          <Link to="/register">Register</Link>
+        </div>
       </form>
     </div>
   )

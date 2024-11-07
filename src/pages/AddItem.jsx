@@ -5,6 +5,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 
 import { createItem } from '../services/apiShelves'
+import toast from 'react-hot-toast'
 
 function AddItem() {
   const [itemName, setItemName] = useState('')
@@ -13,9 +14,21 @@ function AddItem() {
   const navigate = useNavigate()
   const { shelf_id } = useParams()
 
+  const user = JSON.parse(sessionStorage.getItem('user'))
+
   const { mutate } = useMutation({
-    mutationFn: () => createItem({ item_name: itemName, price, shelf_id }),
-    onSuccess: () => navigate(`/shelf/${shelf_id}`),
+    mutationFn: () =>
+      createItem(
+        { itemObj: { item_name: itemName, price, shelf_id } },
+        user.username
+      ),
+    onSuccess: () => {
+      toast.success('Item successfully added')
+      navigate(`/shelf/${shelf_id}`)
+    },
+    onError: err => {
+      toast.error(err.message)
+    },
   })
 
   const handleSubmit = e => {
@@ -39,7 +52,7 @@ function AddItem() {
         <div className="row">
           <div className="col-md-4">&nbsp;</div>
           <div className="col-md-4">
-            <form method="POST" onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit}>
               <div className="mb-3">
                 <label htmlFor="item_name">Item Name</label>
                 <input

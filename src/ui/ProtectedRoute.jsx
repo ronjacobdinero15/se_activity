@@ -3,13 +3,13 @@ import { useNavigate } from 'react-router-dom'
 
 function ProtectedRoute({ children }) {
   const navigate = useNavigate()
-  const currentUser = sessionStorage.getItem('username')
+  const current_user = JSON.parse(sessionStorage.getItem('user'))
 
   useEffect(() => {
-    if (!currentUser) {
+    if (!current_user) {
       navigate('/login')
     }
-  }, [currentUser, navigate])
+  }, [current_user, navigate])
 
   return children
 }
